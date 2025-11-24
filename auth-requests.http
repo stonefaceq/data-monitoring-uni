@@ -1,0 +1,47 @@
+# check server status
+GET http://localhost:5000/status
+Accept: application/json
+
+# register a new user
+POST http://localhost:5000/register
+Content-Type: application/json
+
+{
+    "username": "testuser_01",
+    "password": "securepassword_01"
+}
+
+# login try
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "username": "testuser_01",
+    "password": "securepassword_01"
+}
+
+# bad login try
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "username": "testuser_01",
+    "password": "wrong_password"
+}
+
+
+# succesful data generator stop
+POST http://localhost:5000/generator/stop
+Authorization: Bearer mock-auth-token-12345 
+Content-Type: application/json
+
+
+# bad data generator stop (no token)
+POST http://localhost:5000/generator/stop
+Content-Type: application/json
+
+
+# generator launch
+POST http://localhost:5000/generator/start
+Authorization: Bearer mock-auth-token-12345
+Content-Type: application/json

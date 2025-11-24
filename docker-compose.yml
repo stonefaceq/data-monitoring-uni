@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # DBMS postgres
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: metrics_db
+    volumes:
+      # create table on init
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d metrics_db"] # check if db is ready
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth_server:
+    build:
+      context: ./auth_server
+    container_name: auth_server
+    ports:
+      - "5000:5000"
+    restart: always
+    volumes:
+      # Docker socket
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+
+  data_generator:
+    build: 
+      context: ./data_generator # find dockerfile
+    container_name: data_generator
+    environment:
+      # DB connection uses DB_HOST='postgres' (service name)
+      - DB_HOST=postgres
+      - DB_NAME=metrics_db
+      - DB_USER=user
+      - DB_PASS=password
+    # logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy # launch if healthcheck passed
+    restart: always
+    
+
+  # collect and save data (prometheus)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      # prometheus config loading
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: always
+
+  # data visualisation
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      # Вdefault login/password
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin_password
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus # ensure that prometheus is launched
+    volumes:
+      # create grafana folder for collecting dashboards and config
+      - grafana-storage:/var/lib/grafana
+    restart: always
+
+volumes:
+  grafana-storage:

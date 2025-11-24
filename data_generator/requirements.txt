@@ -1,0 +1,4 @@
+Faker==38.2.0
+prometheus_client==0.23.1
+psycopg2-binary==2.9.11
+tzdata==2025.2
