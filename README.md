@@ -1,4 +1,38 @@
-# data-monitoring-uni
-Grafana: http://localhost:3000
-Prometheus: http://localhost:9090
-auth: http://localhost:5000
+
+# How to Run the System
+
+### 1. Clone the Repository
+Run the following command to clone the repository:
+
+```bash
+git clone https://github.com/stonefaceq/data-monitoring-uni.git
+cd data-monitoring-uni
+```
+
+### 2. Start All Services
+
+Start all services by running:
+
+```bash
+docker-compose up --build -d
+```
+
+* `--build` forces a rebuild of the `auth-service` and `data-generator` images with the latest code.
+* `-d` runs the containers in detached mode (in the background).
+
+## Accessing the Services
+
+Once the system is running, you can access the following web interfaces:
+
+* **Grafana**: [http://localhost:3000](http://localhost:3000)
+* **Prometheus**: [http://localhost:9090](http://localhost:9090)
+* **Auth**: [http://localhost:5000](http://localhost:5000)
+
+
+## Stopping the System
+
+To stop and remove all containers, run the following command:
+
+```bash
+docker-compose down
+```
